@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/internal/proto"
@@ -109,6 +110,115 @@ func stringStructMapParser(rd *proto.Reader, n int64) (interface{}, error) {
 		m[key] = struct{}{}
 	}
 	return m, nil
+}
+
+// Implements proto.MultiBulkParse
+func xStreamSliceParser(rd *proto.Reader, n int64) (interface{}, error) {
+	xx := make([]XStream, n)
+	for i := int64(0); i < n; i++ {
+		var err error
+
+		var v interface{}
+		v, err = rd.ReadArrayReply(xStreamParser)
+		if err != nil {
+			return nil, err
+		}
+
+		xx[i] = v.(XStream)
+	}
+	return xx, nil
+}
+
+// Implements proto.MultiBulkParse
+func xStreamParser(rd *proto.Reader, n int64) (interface{}, error) {
+	x := XStream{}
+	for i := int64(0); i < n; i += 2 {
+		var err error
+
+		x.Stream, err = rd.ReadStringReply()
+		if err != nil {
+			return nil, err
+		}
+
+		var v interface{}
+		v, err = rd.ReadArrayReply(xMessageSliceParser)
+		if err != nil {
+			return nil, err
+		}
+
+		x.Messages = v.([]XMessage)
+	}
+	return x, nil
+}
+
+// Implements proto.MultiBulkParse
+func xMessageSliceParser(rd *proto.Reader, n int64) (interface{}, error) {
+	xx := make([]XMessage, n)
+	for i := int64(0); i < n; i++ {
+		var err error
+
+		var v interface{}
+		v, err = rd.ReadArrayReply(xMessageParser)
+		if err != nil {
+			return nil, err
+		}
+
+		xx[i] = v.(XMessage)
+	}
+
+	return xx, nil
+}
+
+// Implements proto.MultiBulkParse
+func xMessageParser(rd *proto.Reader, n int64) (interface{}, error) {
+	x := XMessage{}
+	var err error
+	var v interface{}
+	id, err := rd.ReadStringReply()
+	if err != nil {
+		return nil, err
+	}
+
+	split := strings.Split(id, "-")
+	x.ID.ID, err = strconv.ParseInt(split[0], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	x.ID.SeqID, err = strconv.Atoi(split[1])
+	if err != nil {
+		return nil, err
+	}
+
+	v, err = rd.ReadArrayReply(xKeyValueParser)
+	if err != nil {
+		return nil, err
+	}
+
+	x.Values = v.(map[string]interface{})
+	return x, nil
+}
+
+// Implements proto.MultiBulkParse
+func xKeyValueParser(rd *proto.Reader, n int64) (interface{}, error) {
+	xMap := make(map[string]interface{})
+	for i := int64(0); i < n; i += 2 {
+		var err error
+
+		key, err := rd.ReadStringReply()
+		if err != nil {
+			return nil, err
+		}
+
+		value, err := rd.ReadStringReply()
+		if err != nil {
+			return nil, err
+		}
+
+		xMap[key] = value
+	}
+
+	return xMap, nil
 }
 
 // Implements proto.MultiBulkParse
