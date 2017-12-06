@@ -1,11 +1,11 @@
 package redis
 
 import (
+	"fmt"
 	"io"
 	"time"
-	"fmt"
 
-	"github.com/go-redis/redis/internal"
+	"github.com/PerformLine/go-redis/internal"
 )
 
 func readTimeout(timeout time.Duration) time.Duration {
@@ -1259,19 +1259,19 @@ func (c *cmdable) SUnionStore(destination string, keys ...string) *IntCmd {
 
 // X represents stream message response.
 type XStream struct {
-	Stream  string
+	Stream   string
 	Messages []XMessage
 }
 
 // XStreamCheckpoint represents a query into a stream
 type XStreamCheckpoint struct {
-	Stream string
+	Stream     string
 	Checkpoint XMessageID
 }
 
 // XMessage represents messages within the stream response
 type XMessage struct {
-	ID XMessageID
+	ID     XMessageID
 	Values map[string]interface{}
 }
 
@@ -1279,16 +1279,16 @@ type XMessage struct {
 // It is composed of an ID (current timestamp if auto-assigned)
 // and a sequence ID. E.g. 1511833543298-0
 type XMessageID struct {
-	ID int64
+	ID    int64
 	SeqID int
-	End bool
+	End   bool
 }
 
 // XAdd represents additional options to the XAdd command
 type XAdd struct {
-	Approximate bool
+	Approximate  bool
 	AutoAssignID bool
-	MaxLen int64
+	MaxLen       int64
 }
 
 func (c *cmdable) xAdd(a []interface{}, n int, els map[string]interface{}) *XMessageIDCmd {
@@ -1397,7 +1397,7 @@ func (c *cmdable) XRead(
 	block time.Duration,
 	extraStreams ...XStreamCheckpoint,
 ) *XStreamSliceCmd {
-	n := 6+2*len(extraStreams)
+	n := 6 + 2*len(extraStreams)
 	args := make([]interface{}, n)
 	args[0] = "xread"
 	args[1] = "block"
@@ -1414,7 +1414,7 @@ func (c *cmdable) XReadN(
 	count int64,
 	extraStreams ...XStreamCheckpoint,
 ) *XStreamSliceCmd {
-	n := 8+2*len(extraStreams)
+	n := 8 + 2*len(extraStreams)
 	args := make([]interface{}, n)
 	args[0] = "xread"
 	args[1] = "block"

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/internal/proto"
+	"github.com/PerformLine/go-redis/internal/proto"
 )
 
 // Implements proto.MultiBulkParse

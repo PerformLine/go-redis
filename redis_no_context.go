@@ -3,7 +3,7 @@
 package redis
 
 import (
-	"github.com/go-redis/redis/internal/pool"
+	"github.com/PerformLine/go-redis/internal/pool"
 )
 
 type baseClient struct {

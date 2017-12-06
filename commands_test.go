@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/go-redis/redis"
+	"github.com/PerformLine/go-redis"
 )
 
 var _ = Describe("Commands", func() {
@@ -2737,7 +2737,7 @@ var _ = Describe("Commands", func() {
 				map[string]interface{}{"quatro": "quatre"},
 			).Result()
 			Expect(err).NotTo(HaveOccurred())
-			Expect(added.ID).To(BeNumerically("<", time.Now().UnixNano() / int64(time.Millisecond)))
+			Expect(added.ID).To(BeNumerically("<", time.Now().UnixNano()/int64(time.Millisecond)))
 
 			vals, err := client.XRange("stream", "-", "+").Result()
 			Expect(err).NotTo(HaveOccurred())
@@ -2900,7 +2900,7 @@ var _ = Describe("Commands", func() {
 			)
 			Expect(xAdd.Err()).NotTo(HaveOccurred())
 
-			xRead := client.XRead("stream", "0", time.Duration(100 * time.Millisecond))
+			xRead := client.XRead("stream", "0", time.Duration(100*time.Millisecond))
 			Expect(xRead.Err()).NotTo(HaveOccurred())
 			Expect(xRead.Val()).To(Equal([]redis.XMessage{
 				{redis.XMessageID{ID: int64(1), SeqID: 0}, map[string]interface{}{"uno": "un"}},
@@ -2908,7 +2908,7 @@ var _ = Describe("Commands", func() {
 				{redis.XMessageID{ID: int64(3), SeqID: 0}, map[string]interface{}{"tres": "troix"}},
 			}))
 
-			xRead = client.XRead("stream", "3", time.Duration(100 * time.Millisecond))
+			xRead = client.XRead("stream", "3", time.Duration(100*time.Millisecond))
 			Expect(xRead.Err()).NotTo(HaveOccurred())
 			Expect(xRead.Val()).To(Equal(nil))
 		})
@@ -2933,14 +2933,14 @@ var _ = Describe("Commands", func() {
 			)
 			Expect(xAdd.Err()).NotTo(HaveOccurred())
 
-			xRead := client.XReadN("stream", "0", time.Duration(100 * time.Millisecond), 2)
+			xRead := client.XReadN("stream", "0", time.Duration(100*time.Millisecond), 2)
 			Expect(xRead.Err()).NotTo(HaveOccurred())
 			Expect(xRead.Val()).To(Equal([]redis.XMessage{
 				{redis.XMessageID{ID: int64(1), SeqID: 0}, map[string]interface{}{"uno": "un"}},
 				{redis.XMessageID{ID: int64(2), SeqID: 0}, map[string]interface{}{"dos": "deux"}},
 			}))
 
-			xRead = client.XReadN("stream", "3", time.Duration(100 * time.Millisecond), 1)
+			xRead = client.XReadN("stream", "3", time.Duration(100*time.Millisecond), 1)
 			Expect(xRead.Err()).NotTo(HaveOccurred())
 			Expect(xRead.Val()).To(Equal(nil))
 		})
